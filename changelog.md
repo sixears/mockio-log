@@ -1,3 +1,7 @@
-0.0.1.0 2019-09-21
+0.0.1.1 2020-09-24
 ==================
-- MockIO, MockIO.DoMock
+- split MockIO.MockIOClass, MockIO.T.Log into separate classes
+
+0.0.1.0 2020-09-22
+==================
+- MockIO.Log, MockIO.IOClass, MockIO.RenderDoMock

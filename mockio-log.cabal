@@ -3,7 +3,7 @@ name:                mockio-log
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.0.1.0
+version:             0.0.1.1
 synopsis:            Combined Mock IO actions with logging
 description:         Combined Mock IO actions with logging
 cabal-version:       >= 1.10
@@ -15,8 +15,10 @@ build-type:          Simple
 library
   ghc-options:        -O2 -W -Wall -fhelpful-errors
   exposed-modules:    MockIO.IOClass
-                    , MockIO.Log
+                    , MockIO.Log, MockIO.T.Log
+                    , MockIO.MockIOClass
                     , MockIO.RenderDoMock
+
   other-modules:
   default-extensions: NoImplicitPrelude
   build-depends:      base, base-unicode-symbols, containers, data-default

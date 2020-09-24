@@ -14,7 +14,7 @@ import Test.Tasty.Runners   ( defaultMainWithIngredients )
 --                     local imports                      --
 ------------------------------------------------------------
 
-import MockIO.Log  ( tests )
+import MockIO.T.Log  ( tests )
 
 --------------------------------------------------------------------------------
 
