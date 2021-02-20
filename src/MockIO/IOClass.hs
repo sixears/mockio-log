@@ -64,12 +64,11 @@ import Text.Parsec.Combinator  ( sepBy )
 
 -- parsec-plus -------------------------
 
-import ParsecPlus  ( Parsecable( parsec, parser ), ParseError
-                   , caseInsensitiveString )
+import ParsecPlus  ( Parsecable( parsec, parser ), ParseError )
 
 -- parser-plus -------------------------
 
-import ParserPlus  ( tries )
+import ParserPlus  ( caseInsensitiveString, tries )
 
 -- tasty -------------------------------
 
@@ -120,18 +119,19 @@ ioClassParses IOExec  = [ "IOExec" ]
 ioClassParses NoIO    = [ "NoIO" ]
 
 instance Parsecable IOClass where
-  parser = let strs =    ("IORead"     , IORead)
-                    :| [ ("IOR"        , IORead)
-                       , ("IOWrite"    , IOWrite)
-                       , ("IOW"        , IOWrite)
-                       , ("IOCmdRead"  , IOCmdR)
-                       , ("IOCmdR"     , IOCmdR)
-                       , ("IOCmdWrite" , IOCmdW)
-                       , ("IOCmdW"     , IOCmdW)
-                       , ("IOExec"     , IOExec)
-                       , ("NoIO"       , NoIO)
-                       ]
-            in tries [ caseInsensitiveString st ⋫ return ioc | (st,ioc) ← strs]
+  parser =
+    let strs =    ("IORead"     , IORead)
+             :| [ ("IOR"        , IORead)
+                , ("IOWrite"    , IOWrite)
+                , ("IOW"        , IOWrite)
+                , ("IOCmdRead"  , IOCmdR)
+                , ("IOCmdR"     , IOCmdR)
+                , ("IOCmdWrite" , IOCmdW)
+                , ("IOCmdW"     , IOCmdW)
+                , ("IOExec"     , IOExec)
+                , ("NoIO"       , NoIO)
+                ]
+     in tries [ caseInsensitiveString @_ @[] st ⋫ return ioc | (st,ioc) ← strs]
 
 ----------
 

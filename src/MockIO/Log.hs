@@ -22,7 +22,7 @@ import Data.Default  ( Default( def ) )
 
 -- log-plus ----------------------------
 
-import Log           ( Log, ToDoc_( toDoc_ ), logIO )
+import Log ( Log, ToDoc_( toDoc_ ), logIO )
 
 -- logging-effect ----------------------
 
@@ -34,7 +34,7 @@ import MonadIO  ( MonadIO )
 
 -- more-unicode ------------------------
 
-import Data.MoreUnicode.Lens     ( (⊢) )
+import Data.MoreUnicode.Lens  ( (⊢) )
 
 -- prettyprinter -----------------------
 
