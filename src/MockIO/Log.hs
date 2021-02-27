@@ -7,7 +7,8 @@
 {-# LANGUAGE UnicodeSyntax     #-}
 
 module MockIO.Log
-  ( DoMock(..), HasDoMock( doMock ), MockIOClass, mkIOL, mkIOL' )
+  ( DoMock(..), HasDoMock( doMock ), MockIOClass
+  , mkIOL, mkIOL', mkIOL'ME, mkIOLME )
 where
 
 -- base --------------------------------
@@ -36,6 +37,10 @@ import MonadIO  ( MonadIO )
 
 import Data.MoreUnicode.Lens  ( (⊢) )
 
+-- mtl ---------------------------------
+
+import Control.Monad.Except  ( ExceptT, MonadError )
+
 -- prettyprinter -----------------------
 
 import Data.Text.Prettyprint.Doc  ( parens )
@@ -45,7 +50,7 @@ import Data.Text.Prettyprint.Doc  ( parens )
 ------------------------------------------------------------
 
 import MockIO.DoMock        ( DoMock( DoMock, NoMock ), HasDoMock( doMock ) )
-import MockIO               ( mkIO' )
+import MockIO               ( mkIO', mkIO'ME )
 import MockIO.IOClass       ( HasIOClass( ioClass ), IOClass )
 import MockIO.MockIOClass   ( MockIOClass )
 
@@ -92,5 +97,38 @@ mkIOL sv ioc lg mock_value io mck =
   let plog l DoMock = parens (toDoc_ l)
       plog l NoMock = toDoc_ l
    in mkIOL' sv ioc (plog lg) (return mock_value) io mck
+
+----------------------------------------
+
+{- | `mkIOL'`, for MonadError/ExceptT values. -}
+
+mkIOL'ME ∷ ∀ ω τ μ ε α .
+            (MonadIO μ, ToDoc_ τ, MonadError ε μ,
+             MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
+            Severity      -- ^ log severity
+          → IOClass       -- ^ log with this IOClass
+          → (DoMock → τ)  -- ^ log message, is given {Do,No}Mock so message can
+                          -- ^ visually identify whether it really happened
+          → ExceptT ε μ α -- ^ mock value; IO is available here so that, e.g., in
+                          -- ^ case of mock a file open, /dev/null is opened
+                          -- ^ instead
+          → ExceptT ε μ α -- ^ the IO to perform when not mocked
+          → DoMock        -- ^ whether to mock
+          → μ α
+mkIOL'ME sv ioc lg mock_value io mck = do
+  logIO sv (def & ioClass ⊢ ioc & doMock ⊢ mck) (lg mck)
+  mkIO'ME mock_value io mck
+
+--------------------
+
+{- | Simplified `mkIOL'ME`. -}
+mkIOLME ∷ ∀ ω τ μ α ε .
+        (MonadIO μ, ToDoc_ τ, MonadError ε μ,
+         MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
+        Severity → IOClass → τ → α → ExceptT ε μ α → DoMock → μ α
+mkIOLME sv ioc lg mock_value io mck =
+  let plog l DoMock = parens (toDoc_ l)
+      plog l NoMock = toDoc_ l
+   in mkIOL'ME sv ioc (plog lg) (return mock_value) io mck
 
 -- that's all, folks! ----------------------------------------------------------
