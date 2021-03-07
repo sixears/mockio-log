@@ -8,26 +8,40 @@
 
 module MockIO.Log
   ( DoMock(..), HasDoMock( doMock ), MockIOClass
-  , mkIOL, mkIOL', mkIOL'ME, mkIOLME )
+  , logit, mkIOL, mkIOL', mkIOL'ME, mkIOLME )
 where
 
 -- base --------------------------------
 
 import Control.Monad  ( return )
+import Data.Either    ( Either )
 import Data.Function  ( (&) )
 import System.IO      ( IO )
+
+-- base-unicode-symbols ----------------
+
+import Data.Function.Unicode  ( (∘) )
 
 -- data-default ------------------------
 
 import Data.Default  ( Default( def ) )
 
+-- exceptions --------------------------
+
+import Control.Monad.Catch ( MonadMask )
+
 -- log-plus ----------------------------
 
-import Log ( Log, ToDoc_( toDoc_ ), logIO )
+import Log ( CSOpt( NoCallStack ), Log, ToDoc_( toDoc_ ), logIO, logToStderr )
 
 -- logging-effect ----------------------
 
-import Control.Monad.Log  ( MonadLog, Severity )
+import Control.Monad.Log  ( LoggingT, MonadLog, Severity )
+
+-- monadio-error -----------------------
+
+import MonadError           ( ѥ )
+import MonadError.IO.Error  ( IOError )
 
 -- monadio-plus ------------------------
 
@@ -130,5 +144,13 @@ mkIOLME sv ioc lg mock_value io mck =
   let plog l DoMock = parens (toDoc_ l)
       plog l NoMock = toDoc_ l
    in mkIOL'ME sv ioc (plog lg) (return mock_value) io mck
+
+----------------------------------------
+
+{- | Log to stderr, no callstack, no transformers: intending for repl
+     development & debugging. -}
+logit ∷ (MonadIO μ, MonadMask μ) ⇒
+        ExceptT IOError (LoggingT (Log MockIOClass) μ) α → μ (Either IOError α)
+logit = logToStderr NoCallStack [] ∘ ѥ
 
 -- that's all, folks! ----------------------------------------------------------
