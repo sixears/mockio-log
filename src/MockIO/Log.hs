@@ -8,7 +8,7 @@
 
 module MockIO.Log
   ( DoMock(..), HasDoMock( doMock ), MockIOClass
-  , logit, mkIOL, mkIOL', mkIOL'ME, mkIOLME )
+  , logit, logit', mkIOL, mkIOL', mkIOL'ME, mkIOLME )
 where
 
 -- base --------------------------------
@@ -104,7 +104,7 @@ mkIOL' sv ioc lg mock_value io mck = do
      (that is surrounded in parens in case of DoMock); and a non-IO mock value.
  -}
 mkIOL ∷ ∀ ω τ μ α .
-        (MonadIO μ, ToDoc_ τ, 
+        (MonadIO μ, ToDoc_ τ,
          MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
         Severity → IOClass → τ → α → IO α → DoMock → μ α
 mkIOL sv ioc lg mock_value io mck =
@@ -149,8 +149,14 @@ mkIOLME sv ioc lg mock_value io mck =
 
 {- | Log to stderr, no callstack, no transformers: intending for repl
      development & debugging. -}
-logit ∷ (MonadIO μ, MonadMask μ) ⇒
-        ExceptT IOError (LoggingT (Log MockIOClass) μ) α → μ (Either IOError α)
+logit ∷ ∀ ε α μ . (MonadIO μ, MonadMask μ) ⇒
+        ExceptT ε (LoggingT (Log MockIOClass) μ) α → μ (Either ε α)
 logit = logToStderr NoCallStack [] ∘ ѥ
+
+logit' ∷ ∀ α μ . (MonadIO μ, MonadMask μ) ⇒
+        ExceptT IOError (LoggingT (Log MockIOClass) μ) α → μ (Either IOError α)
+
+{- | Like `logit`, but with a fixed error type of `IOError`. -}
+logit' = logit
 
 -- that's all, folks! ----------------------------------------------------------
