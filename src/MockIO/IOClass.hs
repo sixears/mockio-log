@@ -1,12 +1,3 @@
-{-# LANGUAGE MonadComprehensions #-}
-{-# LANGUAGE NoImplicitPrelude   #-}
-{-# LANGUAGE OverloadedStrings   #-}
-{-# LANGUAGE QuasiQuotes         #-}
-{-# LANGUAGE TypeApplications    #-}
-{-# LANGUAGE TypeFamilies        #-}
-{-# LANGUAGE UnicodeSyntax       #-}
-{-# LANGUAGE ViewPatterns        #-}
-
 module MockIO.IOClass
   ( HasIOClass( ioClass ), IOClass(..), IOClassSet
   , (∈), ioClasses, ioClassParses, isExternalIO, isInternalIO, member )
@@ -109,7 +100,7 @@ data IOClass = IORead  -- ^ An IO action that perceives but does not alter state
 --------------------
 
 {- | Lookup table of IOClass to possible (case-insensitive) string
-     representations. -}  
+     representations. -}
 ioClassParses ∷ IOClass → [String]
 ioClassParses IORead  = [ "IORead",     "IOR" ]
 ioClassParses IOWrite = [ "IOWrite",    "IOW" ]

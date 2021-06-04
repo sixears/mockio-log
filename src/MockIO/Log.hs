@@ -1,30 +1,27 @@
-{-# LANGUAGE FlexibleContexts  #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE RankNTypes        #-}
-{-# LANGUAGE TypeApplications  #-}
-{-# LANGUAGE UnicodeSyntax     #-}
-
 module MockIO.Log
   ( DoMock(..), HasDoMock( doMock ), MockIOClass
-  , logit, logit', mkIOL, mkIOL', mkIOL'ME, mkIOLME )
+  , logit, logit', mkIOL, mkIOL', mkIOL'ME, mkIOLME, mkIOLMER )
 where
 
 -- base --------------------------------
 
-import Control.Monad  ( return )
-import Data.Either    ( Either )
-import Data.Function  ( (&) )
+import Control.Monad  ( forM_, return )
+import Data.Function  ( ($), (&) )
+import GHC.Stack      ( HasCallStack )
 import System.IO      ( IO )
 
 -- base-unicode-symbols ----------------
 
 import Data.Function.Unicode  ( (∘) )
+import Data.Monoid.Unicode    ( (⊕) )
 
 -- data-default ------------------------
 
 import Data.Default  ( Default( def ) )
+
+-- data-textual ------------------------
+
+import Data.Textual  ( Printable )
 
 -- exceptions --------------------------
 
@@ -49,15 +46,22 @@ import MonadIO  ( MonadIO )
 
 -- more-unicode ------------------------
 
-import Data.MoreUnicode.Lens  ( (⊢) )
+import Data.MoreUnicode.Either  ( 𝔼, pattern 𝕷, pattern 𝕽 )
+import Data.MoreUnicode.Lens    ( (⊢) )
+import Data.MoreUnicode.Maybe   ( 𝕄, pattern 𝕵, pattern 𝕹 )
+import Data.MoreUnicode.Text    ( 𝕋 )
 
 -- mtl ---------------------------------
 
-import Control.Monad.Except  ( ExceptT, MonadError )
+import Control.Monad.Except  ( ExceptT, MonadError, throwError )
 
 -- prettyprinter -----------------------
 
 import Data.Text.Prettyprint.Doc  ( parens )
+
+-- tfmt --------------------------------
+
+import Text.Fmt  ( fmtT )
 
 ------------------------------------------------------------
 --                     local imports                      --
@@ -117,7 +121,7 @@ mkIOL sv ioc lg mock_value io mck =
 {- | `mkIOL'`, for MonadError/ExceptT values. -}
 
 mkIOL'ME ∷ ∀ ω τ μ ε α .
-            (MonadIO μ, ToDoc_ τ, MonadError ε μ,
+            (MonadIO μ, ToDoc_ τ, MonadError ε μ, HasCallStack,
              MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
             Severity      -- ^ log severity
           → IOClass       -- ^ log with this IOClass
@@ -137,7 +141,7 @@ mkIOL'ME sv ioc lg mock_value io mck = do
 
 {- | Simplified `mkIOL'ME`. -}
 mkIOLME ∷ ∀ ω τ μ α ε .
-        (MonadIO μ, ToDoc_ τ, MonadError ε μ,
+        (MonadIO μ, ToDoc_ τ, MonadError ε μ, HasCallStack,
          MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
         Severity → IOClass → τ → α → ExceptT ε μ α → DoMock → μ α
 mkIOLME sv ioc lg mock_value io mck =
@@ -147,14 +151,37 @@ mkIOLME sv ioc lg mock_value io mck =
 
 ----------------------------------------
 
+{- | Log a mockable IO Action, including its result (if provided a suitable
+     formatter), and any exception it throws. -}
+mkIOLMER ∷ (MonadIO μ, Printable ε, MonadError ε μ, HasCallStack,
+            MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
+            Severity → IOClass → 𝕋 → 𝕄 (α → [𝕋]) → α
+         → ExceptT ε IO α → DoMock → μ α
+mkIOLMER sev ioclass msg valmsg mock_value io mck = do
+  let stg  = def & ioClass ⊢ ioclass & doMock ⊢ mck
+      pp ∷ DoMock → 𝕋 → 𝕋
+      pp NoMock t = t
+      pp DoMock t = "(" ⊕ t ⊕ ")"
+  result ← mkIOL sev ioclass msg (𝕽 mock_value) (ѥ io) mck
+  case result of
+    𝕷 e → do logIO sev stg (pp mck $ [fmtT|%t FAILED: %T|] msg e)
+             throwError e
+    𝕽 r → do case valmsg of
+               𝕹   → return ()
+               𝕵 v → forM_ (v r) $ \ t →
+                       logIO sev stg (pp mck $ [fmtT|%t: %t|] msg t)
+             return r
+
+----------------------------------------
+
 {- | Log to stderr, no callstack, no transformers: intending for repl
      development & debugging. -}
 logit ∷ ∀ ε α μ . (MonadIO μ, MonadMask μ) ⇒
-        ExceptT ε (LoggingT (Log MockIOClass) μ) α → μ (Either ε α)
+        ExceptT ε (LoggingT (Log MockIOClass) μ) α → μ (𝔼 ε α)
 logit = logToStderr NoCallStack [] ∘ ѥ
 
 logit' ∷ ∀ α μ . (MonadIO μ, MonadMask μ) ⇒
-        ExceptT IOError (LoggingT (Log MockIOClass) μ) α → μ (Either IOError α)
+         ExceptT IOError (LoggingT (Log MockIOClass) μ) α → μ (𝔼 IOError α)
 
 {- | Like `logit`, but with a fixed error type of `IOError`. -}
 logit' = logit

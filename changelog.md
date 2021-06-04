@@ -1,3 +1,7 @@
+0.0.4.0 2021-06-02
+==================
+- add mkIOLMER (brought here from mockio-plus)
+
 0.0.3.0 2021-03-07
 ==================
 - add logit

@@ -1,6 +1,3 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE UnicodeSyntax     #-}
-
 module MockIO.MockIOClass
   ( MockIOClass( MockIOClass ) )
 where
