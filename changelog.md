@@ -1,3 +1,7 @@
+0.0.5.0 2021-07-02
+==================
+- add Eq instance to MockIOClass
+
 0.0.4.0 2021-06-02
 ==================
 - add mkIOLMER (brought here from mockio-plus)

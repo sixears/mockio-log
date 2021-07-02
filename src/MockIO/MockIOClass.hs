@@ -4,6 +4,7 @@ where
 
 -- base --------------------------------
 
+import Data.Eq    ( Eq )
 import Text.Show  ( Show )
 
 -- base-unicode-symbols ----------------
@@ -34,7 +35,7 @@ import MockIO.IOClass       ( HasIOClass( ioClass ), IOClass )
 
 {- | A unification of IOClass & DoMock for simple mockio logging. -}
 data MockIOClass = MockIOClass IOClass DoMock
-  deriving Show
+  deriving (Eq,Show)
 
 instance Default MockIOClass where
   def = MockIOClass def NoMock
