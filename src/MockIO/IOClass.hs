@@ -15,6 +15,7 @@ import Data.List.NonEmpty  ( NonEmpty( (:|) ) )
 import Data.Ord            ( Ord )
 import Data.String         ( String )
 import GHC.Enum            ( Enum )
+import GHC.Generics        ( Generic )
 import System.Exit         ( ExitCode )
 import System.IO           ( IO )
 import Text.Show           ( Show( show ) )
@@ -35,6 +36,10 @@ import Data.Default  ( Default( def ) )
 -- data-textual ------------------------
 
 import Data.Textual  ( Printable( print ) )
+
+-- deepseq -----------------------------
+
+import Control.DeepSeq  ( NFData )
 
 -- lens --------------------------------
 
@@ -95,7 +100,7 @@ data IOClass = IORead  -- ^ An IO action that perceives but does not alter state
              | IOExec  -- ^ An exec (replaces this executable).
              | NoIO    -- ^ No IO.
   -- ordering is not relevant, we just derive it to support Set
-  deriving (Enum,Eq,Ord,Show)
+  deriving (Enum,Eq,Generic,NFData,Ord,Show)
 
 --------------------
 

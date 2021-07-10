@@ -4,8 +4,9 @@ where
 
 -- base --------------------------------
 
-import Data.Eq    ( Eq )
-import Text.Show  ( Show )
+import Data.Eq       ( Eq )
+import GHC.Generics  ( Generic )
+import Text.Show     ( Show )
 
 -- base-unicode-symbols ----------------
 
@@ -15,6 +16,10 @@ import Data.Eq.Unicode    ( (≡) )
 -- data-default ------------------------
 
 import Data.Default  ( Default( def ) )
+
+-- deepseq -----------------------------
+
+import Control.DeepSeq  ( NFData )
 
 -- lens --------------------------------
 
@@ -35,7 +40,7 @@ import MockIO.IOClass       ( HasIOClass( ioClass ), IOClass )
 
 {- | A unification of IOClass & DoMock for simple mockio logging. -}
 data MockIOClass = MockIOClass IOClass DoMock
-  deriving (Eq,Show)
+  deriving (Eq,Generic,NFData,Show)
 
 instance Default MockIOClass where
   def = MockIOClass def NoMock

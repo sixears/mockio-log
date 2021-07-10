@@ -1,3 +1,7 @@
+0.0.6.0 2021-07-10
+==================
+- add NFData instances of IOClass,MockIOClass
+
 0.0.5.0 2021-07-02
 ==================
 - add Eq instance to MockIOClass
