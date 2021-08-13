@@ -1,5 +1,8 @@
 module MockIO.Log
   ( DoMock(..), HasDoMock( doMock ), MockIOClass
+  , emergencyIO, alertIO, criticalIO, errIO, warnIO, noticeIO, infoIO, debugIO
+  , emergencyIO', alertIO', criticalIO', errIO', warnIO', noticeIO', infoIO'
+  , debugIO'
   , logit, logit', mkIOL, mkIOL', mkIOL'ME, mkIOLME, mkIOLMER )
 where
 
@@ -33,7 +36,10 @@ import Log ( CSOpt( NoCallStack ), Log, ToDoc_( toDoc_ ), logIO, logToStderr )
 
 -- logging-effect ----------------------
 
-import Control.Monad.Log  ( LoggingT, MonadLog, Severity )
+import Control.Monad.Log  ( LoggingT, MonadLog
+                          , Severity( Emergency, Alert, Critical, Error, Warning
+                                    , Notice, Informational, Debug )
+                          )
 
 -- monadio-error -----------------------
 
@@ -171,6 +177,99 @@ mkIOLMER sev ioclass msg valmsg mock_value io mck = do
                𝕵 v → forM_ (v r) $ \ t →
                        logIO sev stg (pp mck $ [fmtT|%t: %t|] msg t)
              return r
+
+----------------------------------------
+
+{- | Log a message, at Emergency level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+emergencyIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒
+              DoMock → ρ → μ ()
+emergencyIO mock_value msg = mkIOL Emergency def msg () (return ()) mock_value
+
+{- | Like `emergencyIO`, but with `Text` and `NoMock`. -}
+emergencyIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+emergencyIO' = emergencyIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Alert level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+alertIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒ DoMock → ρ → μ()
+alertIO mock_value msg = mkIOL Alert def msg () (return ()) mock_value
+
+{- | Like `alertIO`, but with `Text` and `NoMock`. -}
+alertIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+alertIO' = alertIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Critical level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+criticalIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒
+             DoMock → ρ → μ ()
+criticalIO mock_value msg = mkIOL Critical def msg () (return ()) mock_value
+
+{- | Like `criticalIO`, but with `Text` and `NoMock`. -}
+criticalIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+criticalIO' = criticalIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Error level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+errIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒ DoMock → ρ → μ ()
+errIO mock_value msg = mkIOL Error def msg () (return ()) mock_value
+
+{- | Like `errIO`, but with `Text` and `NoMock`. -}
+errIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+errIO' = errIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Warn level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+warnIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒ DoMock → ρ → μ ()
+warnIO mock_value msg = mkIOL Warning def msg () (return ()) mock_value
+
+{- | Like `warnIO`, but with `Text` and `NoMock`. -}
+warnIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+warnIO' = warnIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Notice level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+noticeIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒
+           DoMock → ρ → μ ()
+noticeIO mock_value msg = mkIOL Notice def msg () (return ()) mock_value
+
+{- | Like `noticeIO`, but with `Text` and `NoMock`. -}
+noticeIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+noticeIO' = noticeIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Info level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+infoIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒
+           DoMock → ρ → μ ()
+infoIO mock_value msg = mkIOL Informational def msg () (return ()) mock_value
+
+{- | Like `infoIO`, but with `Text` and `NoMock`. -}
+infoIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+infoIO' = infoIO NoMock
+
+----------------------------------------
+
+{- | Log a message, at Debug level, with MockIOClass defaults; use IO so the
+     message gets a timestamp. -}
+debugIO ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ, ToDoc_ ρ) ⇒
+           DoMock → ρ → μ ()
+debugIO mock_value msg = mkIOL Debug def msg () (return ()) mock_value
+
+{- | Like `debugIO`, but with `Text` and `NoMock`. -}
+debugIO' ∷ (MonadIO μ, MonadLog (Log MockIOClass) μ) ⇒ 𝕋 → μ ()
+debugIO' = debugIO NoMock
 
 ----------------------------------------
 

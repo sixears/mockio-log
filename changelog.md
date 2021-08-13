@@ -1,3 +1,7 @@
+0.0.7.0 2021-08-13
+==================
+- add *IO, *IO' for each error level
+
 0.0.6.0 2021-07-10
 ==================
 - add NFData instances of IOClass,MockIOClass
