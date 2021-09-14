@@ -29,6 +29,10 @@ import Data.Function.Unicode  ( (∘) )
 
 import qualified Data.Set  as  Set
 
+-- containers-plus ---------------------
+
+import ContainersPlus.Member  ( HasMember( MemberType, member, (∈) ) )
+
 -- data-default ------------------------
 
 import Data.Default  ( Default( def ) )
@@ -179,11 +183,10 @@ isInternalIO = not ∘ isExternalIO
 newtype IOClassSet = IOClassSet { unIOClassSet ∷ Set.Set IOClass }
   deriving (Eq, Show)
 
-member ∷ IOClass → IOClassSet → 𝔹
-member ioc (IOClassSet iocs) = ioc `Set.member` iocs
-
-(∈) ∷ IOClass → IOClassSet → 𝔹
-(∈) = member
+instance HasMember IOClassSet where
+  type MemberType IOClassSet = IOClass
+  member ∷ IOClass → IOClassSet → 𝔹
+  member ioc (IOClassSet iocs) = ioc `Set.member` iocs
 
 ----------
 

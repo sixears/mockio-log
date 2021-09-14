@@ -1,3 +1,7 @@
+0.1.0.0 2021-09-14
+==================
+- use ContainersPlus.Member for IOClassSet
+
 0.0.7.0 2021-08-13
 ==================
 - add *IO, *IO' for each error level
