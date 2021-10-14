@@ -3,7 +3,7 @@ name:                mockio-log
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Combined Mock IO actions with logging
 description:         Combined Mock IO actions with logging
 cabal-version:       >= 1.10
@@ -41,13 +41,13 @@ library
                     , tasty, tasty-hunit, text, text-printer, time
 
                     , containers-plus >= 0.0.4.0
-                    , log-plus        >= 0.0.3.0
-                    , mockio          >= 0.0.4.0
+                    , log-plus        >= 0.0.3.1
+                    , mockio          >= 0.0.4.1
                     , monaderror-io   >= 1.2.0.0
-                    , monadio-plus    >= 1.4.14.1
-                    , more-unicode    >= 0.0.15.0
-                    , parsec-plus     >= 1.1.0.1
-                    , parser-plus     >= 1.0.5.0
+                    , monadio-plus    >= 2.0.0.0
+                    , more-unicode    >= 0.0.16.0
+                    , parsec-plus     >= 1.1.0.2
+                    , parser-plus     >= 1.0.6.0
                     , tasty-plus      >= 1.5.1.0
                     , tfmt            >= 0.2.4.0
 
