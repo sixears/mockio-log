@@ -1,3 +1,15 @@
+0.1.0.4 2022-04-06
+==================
+- upgrade dependencies; particularly monadio-plus to 2.3.0.0
+
+0.1.0.3 2022-04-05
+==================
+- upgrade log-plus to 0.0.4.2, monadio-plus to 2.2.0.0
+
+0.1.0.2 2022-04-04
+==================
+- upgrade dependencies; particularly monadio-plus to 2.1.0.0
+
 0.1.0.1 2021-10-13
 ==================
 - upgrade dependencies

@@ -161,8 +161,8 @@ mkIOLME sv ioc lg mock_value io mck =
      formatter), and any exception it throws. -}
 mkIOLMER ∷ (MonadIO μ, Printable ε, MonadError ε μ, HasCallStack,
             MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
-            Severity → IOClass → 𝕋 → 𝕄 (α → [𝕋]) → α
-         → ExceptT ε IO α → DoMock → μ α
+           Severity → IOClass → 𝕋 → 𝕄 (α → [𝕋]) → α → ExceptT ε IO α → DoMock
+         → μ α
 mkIOLMER sev ioclass msg valmsg mock_value io mck = do
   let stg  = def & ioClass ⊢ ioclass & doMock ⊢ mck
       pp ∷ DoMock → 𝕋 → 𝕋
