@@ -1,3 +1,11 @@
+0.1.2.0 2022-06-08
+==================
+- add logio
+
+0.1.1.0 2022-04-07
+==================
+- factor logResult from MockIO.Log.mkIOLMER
+
 0.1.0.4 2022-04-06
 ==================
 - upgrade dependencies; particularly monadio-plus to 2.3.0.0

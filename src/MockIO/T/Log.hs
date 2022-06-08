@@ -38,7 +38,7 @@ import Data.MoreUnicode.Natural  ( ℕ )
 
 -- prettyprinter -----------------------
 
-import Data.Text.Prettyprint.Doc  ( pretty )
+import Prettyprinter  ( pretty )
 
 -- tasty -------------------------------
 

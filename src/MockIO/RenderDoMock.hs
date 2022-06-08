@@ -22,11 +22,11 @@ import Data.MoreUnicode.Lens  ( (⊣) )
 
 -- prettyprinter -----------------------
 
-import Data.Text.Prettyprint.Doc                  ( annotate )
+import Prettyprinter  ( annotate )
 
 -- prettyprinter-ansi-terminal ---------
 
-import Data.Text.Prettyprint.Doc.Render.Terminal  ( italicized )
+import Prettyprinter.Render.Terminal  ( italicized )
 
 ------------------------------------------------------------
 --                     local imports                      --
@@ -39,7 +39,7 @@ import MockIO.DoMock        ( DoMock( DoMock ), HasDoMock( doMock ) )
 renderWithDoMock ∷ HasDoMock τ ⇒ LogR τ
 
 renderWithDoMock f m = if m ⊣ attrs ∘ doMock ≡ DoMock
-                           then annotate italicized $ f m
-                           else f m
+                       then annotate italicized $ f m
+                       else f m
 
 -- that's all, folks! ----------------------------------------------------------
