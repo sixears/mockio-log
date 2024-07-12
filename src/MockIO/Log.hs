@@ -1,18 +1,40 @@
+{-# LANGUAGE UnicodeSyntax #-}
 module MockIO.Log
-  ( DoMock(..), HasDoMock( doMock ), MockIOClass
-  , emergencyIO, alertIO, criticalIO, errIO, warnIO, noticeIO, infoIO, debugIO
-  , emergencyIO', alertIO', criticalIO', errIO', warnIO', noticeIO', infoIO'
+  ( DoMock(..)
+  , HasDoMock(doMock)
+  , MockIOClass
+  , alertIO
+  , alertIO'
+  , criticalIO
+  , criticalIO'
+  , debugIO
   , debugIO'
-  , logio, logit, logit', logResult
-  , mkIOL, mkIOL', mkIOL'ME, mkIOLME, mkIOLMER
-  )
-where
+  , emergencyIO
+  , emergencyIO'
+  , errIO
+  , errIO'
+  , infoIO
+  , infoIO'
+  , logResult
+  , logio
+  , logit
+  , logit'
+  , mkIOL
+  , mkIOL'
+  , mkIOL'ME
+  , mkIOLME
+  , mkIOLMER
+  , noticeIO
+  , noticeIO'
+  , warnIO
+  , warnIO'
+  ) where
 
 import Base1T
 
 -- base --------------------------------
 
-import Data.Foldable  ( Foldable )
+import Data.Foldable ( Foldable )
 
 -- exceptions --------------------------
 
@@ -20,31 +42,29 @@ import Control.Monad.Catch ( MonadMask )
 
 -- log-plus ----------------------------
 
-import Log ( CSOpt( NoCallStack ), Log, ToDoc_( toDoc_ ), logIO, logToStderr )
+import Log ( CSOpt(NoCallStack), Log, ToDoc_(toDoc_), logIO, logToStderr )
 
 -- logging-effect ----------------------
 
-import Control.Monad.Log  ( LoggingT, MonadLog
-                          , Severity( Emergency, Alert, Critical, Error, Warning
-                                    , Notice, Informational, Debug )
-                          )
+import Control.Monad.Log ( LoggingT, MonadLog,
+                           Severity(Alert, Critical, Debug, Emergency, Error, Informational, Notice, Warning) )
 
 -- monadio-error -----------------------
 
-import MonadError.IO.Error  ( IOError )
+import MonadError.IO.Error ( IOError )
 
 -- prettyprinter -----------------------
 
-import Prettyprinter  ( parens )
+import Prettyprinter ( parens )
 
 ------------------------------------------------------------
 --                     local imports                      --
 ------------------------------------------------------------
 
-import MockIO.DoMock        ( DoMock( DoMock, NoMock ), HasDoMock( doMock ) )
-import MockIO               ( mkIO', mkIO'ME )
-import MockIO.IOClass       ( HasIOClass( ioClass ), IOClass )
-import MockIO.MockIOClass   ( MockIOClass )
+import MockIO             ( mkIO', mkIO'ME' )
+import MockIO.DoMock      ( DoMock(DoMock, NoMock), HasDoMock(doMock) )
+import MockIO.IOClass     ( HasIOClass(ioClass), IOClass(Except) )
+import MockIO.MockIOClass ( MockIOClass )
 
 --------------------------------------------------------------------------------
 
@@ -97,31 +117,38 @@ mkIOL sv ioc lg mock_value io mck =
 mkIOL'ME ∷ ∀ ω τ μ ε α .
             (MonadIO μ, ToDoc_ τ, MonadError ε μ, HasCallStack,
              MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
-            Severity      -- ^ log severity
-          → IOClass       -- ^ log with this IOClass
-          → (DoMock → τ)  -- ^ log message, is given {Do,No}Mock so message can
-                          -- ^ visually identify whether it really happened
-          → ExceptT ε μ α -- ^ mock value; IO is available here so that, e.g., in
-                          -- ^ case of mock a file open, /dev/null is opened
-                          -- ^ instead
-          → ExceptT ε μ α -- ^ the IO to perform when not mocked
-          → DoMock        -- ^ whether to mock
+            (μ (𝔼 ε α) → μ (𝔼 ε α)) -- ^ handle / log / amend return value
+          → Severity                 -- ^ log severity
+          → IOClass                  -- ^ log with this IOClass
+          → (DoMock → τ)             -- ^ log message, is given {Do,No}Mock so
+                                     --   message can visually identify whether
+                                     --   it really happened
+          → ExceptT ε μ α            -- ^ mock value; IO is available here so
+                                     --   that, e.g., in case of mock a file
+                                     --   open, /dev/null is opened instead
+          → ExceptT ε μ α            -- ^ the IO to perform when not mocked
+          → DoMock                   -- ^ whether to mock
           → μ α
-mkIOL'ME sv ioc lg mock_value io mck = do
+mkIOL'ME handle sv ioc lg mock_value io mck = do
   logIO sv (def & ioClass ⊢ ioc & doMock ⊢ mck) (lg mck)
-  mkIO'ME mock_value io mck
+  mkIO'ME' handle mock_value io mck
 
 --------------------
 
 {- | Simplified `mkIOL'ME`. -}
 mkIOLME ∷ ∀ ω τ μ α ε .
-        (MonadIO μ, ToDoc_ τ, MonadError ε μ, HasCallStack,
+        (MonadIO μ, ToDoc_ τ, Printable ε, MonadError ε μ, HasCallStack,
          MonadLog (Log ω) μ, Default ω, HasIOClass ω, HasDoMock ω) ⇒
         Severity → IOClass → τ → α → ExceptT ε μ α → DoMock → μ α
 mkIOLME sv ioc lg mock_value io mck =
   let plog l DoMock = parens (toDoc_ l)
       plog l NoMock = toDoc_ l
-   in mkIOL'ME sv ioc (plog lg) (return mock_value) io mck
+      whenLeft h x = case x of 𝕷 e → h e; 𝕽 _ → return ()
+      logExcept e = logIO sv (def & ioClass ⊢ Except) (toText e)
+      do' ∷ Monad η ⇒ (β → η ()) → η β → η β
+      do' f r = do { r ≫ f; r }
+   in mkIOL'ME (do' (whenLeft logExcept))
+               sv ioc (plog lg) (return mock_value) io mck
 
 ----------------------------------------
 

@@ -1,3 +1,7 @@
+0.1.3.1 2024-07-12
+==================
+- log Exceptions in mkIOLME
+
 0.1.3.0 2023-11-10
 ==================
 - add Log.MonadReader
